@@ -1,0 +1,6 @@
+{
+    "library": "./index.js",
+    "hooks": [
+        { "hook": "filter:topic.build", "method": "onTopicBuild"}
+    ]
+}

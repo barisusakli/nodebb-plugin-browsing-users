@@ -16,7 +16,7 @@ plugin.onTopicBuild = function(data, callback) {
 
 		// TODO: use .clientRooms() to turn socketids to uids
 		// https://github.com/socketio/socket.io-redis/pull/146
-		data.browsingUsers = socketids;
+		data.templateData.browsingUsers = socketids;
 		callback(null, data);
 	});
 };

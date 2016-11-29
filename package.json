@@ -18,7 +18,9 @@
   ],
   "author": "Baris Usakli <baris@nodebb.org>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "async": "2.1.4"
+  },
   "nbbpm": {
     "compatibility": "^1.0.0"
   }

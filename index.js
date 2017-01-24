@@ -1,7 +1,10 @@
 
 'use strict';
 
-var async = require.main.require('async');
+var async = require('async');
+var user = require.main.require('./src/user');
+
+
 var plugin = module.exports;
 
 plugin.onTopicBuild = function(data, callback) {
@@ -10,17 +13,16 @@ plugin.onTopicBuild = function(data, callback) {
 	}
 	var io = require.main.require('./src/socket.io').server;
 
-	io.in('topic_' + data.templateData.tid).clients(function (err, socketids) {
-		if (err) {
-			return callback(err);
-		}
-
-		async.map(socketids, function (sid, next) {
-			io.of('/').adapter.clientRooms(sid, next);
-		}, function (err, roomData) {
-			if (err) {
-				return callback(err);
-			}
+	async.waterfall([
+		function (next) {
+			io.in('topic_' + data.templateData.tid).clients(next);
+		},
+		function (socketids, next) {
+			async.map(socketids, function (sid, next) {
+				io.of('/').adapter.clientRooms(sid, next);
+			}, next);
+		},
+		function (roomData, next) {
 			var uids = {};
 
 			roomData.forEach(function(clientRooms) {
@@ -31,10 +33,17 @@ plugin.onTopicBuild = function(data, callback) {
 				});
 			});
 
-			data.templateData.browsingUsers = Object.keys(uids);
-			callback(null, data);
-		});
-	});
+			if (data.req.uid) {
+				uids[data.req.uid] = true;
+			}
+
+			user.getUsersFields(Object.keys(uids), ['username', 'userslug', 'uid', 'picture'], next);
+		},
+		function (userData, next) {
+			data.templateData.browsingUsers = userData;
+			next(null, data);
+		}
+	], callback);
 };
 
 

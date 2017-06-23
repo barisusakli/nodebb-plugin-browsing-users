@@ -19,7 +19,8 @@
   "author": "Baris Usakli <baris@nodebb.org>",
   "license": "MIT",
   "dependencies": {
-    "async": "2.1.4"
+    "async": "2.1.4",
+    "lru-cache": "4.1.1"
   },
   "nbbpm": {
     "compatibility": "^1.0.0"

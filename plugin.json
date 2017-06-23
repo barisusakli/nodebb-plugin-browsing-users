@@ -1,6 +1,9 @@
 {
-    "library": "./index.js",
-    "hooks": [
-        { "hook": "filter:topic.build", "method": "onTopicBuild"}
-    ]
+	"library": "./index.js",
+	"hooks": [
+		{ "hook": "filter:topic.build", "method": "onTopicBuild"}
+	],
+	"scripts": [
+		"./lib/client.js"
+	]
 }

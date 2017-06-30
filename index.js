@@ -96,7 +96,16 @@ function getUsersInTopic(uid, tid, callback) {
 			cache.set('browsing:tid:' + tid, userData);
 			next(null, userData);
 		},
-	], callback);
+	], function (err, userData) {
+		if (err) {
+			if (err.message === 'timeout reached while waiting for clients response') {
+				return callback(null, null);
+			} else {
+				return callback(err);
+			}
+		}
+		callback(null, userData)
+	});
 }
 
 

@@ -91,7 +91,7 @@ function getUsersInTopic(uid, tid, callback) {
 		},
 		function (userData, next) {
 			userData = userData.filter(function (user) {
-				return user && parseInt(uid, 10) > 0 && user.status !== 'offline';
+				return user && parseInt(user.uid, 10) > 0 && user.status !== 'offline';
 			}).slice(0, 10);
 			cache.set('browsing:tid:' + tid, userData);
 			next(null, userData);

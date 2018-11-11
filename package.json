@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-browsing-users",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A plugin that adds the browsing users to topic API",
   "main": "index.js",
   "repository": {

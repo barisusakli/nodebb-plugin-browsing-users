@@ -16,7 +16,7 @@ var socketPlugins = require.main.require('./src/socket.io/plugins');
 var plugin = module.exports;
 
 plugin.onTopicBuild = function(data, callback) {
-	if (!data || !data.templateData || !data.templateData.tid) {
+	if (!data || !data.templateData || !data.templateData.tid || data.req.uid < 0) {
 		return callback(null, data);
 	}
 

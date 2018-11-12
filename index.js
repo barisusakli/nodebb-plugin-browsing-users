@@ -15,22 +15,6 @@ var socketPlugins = require.main.require('./src/socket.io/plugins');
 
 var plugin = module.exports;
 
-plugin.onTopicBuild = function(data, callback) {
-	if (!data || !data.templateData || !data.templateData.tid || data.req.uid < 0) {
-		return callback(null, data);
-	}
-
-	async.waterfall([
-		function (next) {
-			getUsersInTopic(data.req.uid, data.templateData.tid, next);
-		},
-		function (userData, next) {
-			data.templateData.browsingUsers = userData;
-			next(null, data);
-		},
-	], callback);
-};
-
 socketPlugins.browsingUsers = {};
 socketPlugins.browsingUsers.getBrowsingUsers = function(socket, tid, callback) {
 	async.waterfall([

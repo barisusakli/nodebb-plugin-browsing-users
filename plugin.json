@@ -1,8 +1,12 @@
 {
 	"library": "./index.js",
 	"hooks": [
+		{ "hook": "static:app.load", "method": "init" }
 	],
 	"scripts": [
 		"./lib/client.js"
+	],
+	"acpScripts": [
+		"./public/admin/browsing-users.js"
 	]
 }

@@ -1,95 +1,88 @@
 'use strict';
 
-var async = require('async');
-var LRU = require('lru-cache');
+const LRU = require('lru-cache');
+const util = require('util');
 
-var cache = LRU({
+const cache = LRU({
 	max: 500,
 	length: function () { return 1; },
 	maxAge: 10000
 });
 
-var user = require.main.require('./src/user');
-var privileges = require.main.require('./src/privileges');
-var socketPlugins = require.main.require('./src/socket.io/plugins');
+const meta = require.main.require('./src/meta');
+const user = require.main.require('./src/user');
+const privileges = require.main.require('./src/privileges');
+const socketPlugins = require.main.require('./src/socket.io/plugins');
+const routeHelpers = require.main.require('./src/routes/helpers');
+const socketIO = require.main.require('./src/socket.io');
 
-var plugin = module.exports;
+const plugin = module.exports;
+
+plugin.init = async function(hookData) {
+	routeHelpers.setupAdminPageRoute(hookData.router, '/admin/plugins/browsing-users', hookData.middleware, [], renderAdmin);
+};
+
+async function renderAdmin(req, res) {
+	res.render('admin/plugins/browsing-users', { best: 1 });
+}
 
 socketPlugins.browsingUsers = {};
-socketPlugins.browsingUsers.getBrowsingUsers = function(socket, tid, callback) {
-	async.waterfall([
-		function (next) {
-			privileges.topics.can('read', tid, socket.uid, next);
-		},
-		function (canRead, next) {
-			if (!canRead) {
-				return next(new Error('[[error:no-privileges]]'));
-			}
-			getUsersInTopic(socket.uid, tid, next);
-		},
-	], callback);
+socketPlugins.browsingUsers.getBrowsingUsers = async function(socket, tid) {
+	const canRead = await privileges.topics.can('read', tid, socket.uid);
+	if (!canRead) {
+		throw new Error('[[error:no-privileges]]');
+	}
+	return await getUsersInTopic(socket.uid, tid);
 };
 
 function isUserInCache(browsingUsers, uid) {
-	if (!parseInt(uid, 10)) {
+	if (parseInt(uid, 10) <= 0) {
 		return true;
 	}
-	return browsingUsers.find(function (user) {
-		return parseInt(user.uid, 10) === parseInt(uid, 10);
-	});
+	return browsingUsers.find(user => parseInt(user.uid, 10) === parseInt(uid, 10));
 }
 
-function getUsersInTopic(uid, tid, callback) {
+const ioClients = util.promisify((room, callback) => socketIO.server.in(room).clients(callback));
+const ioClientRooms = util.promisify((sid, callback) => socketIO.server.of('/').adapter.clientRooms(sid, callback));
+
+async function getUsersInTopic(uid, tid) {
 	var browsingUsers = cache.peek('browsing:tid:' + tid);
 	if (browsingUsers && isUserInCache(browsingUsers, uid)) {
-		return setImmediate(callback, null, browsingUsers);
+		return browsingUsers;
 	}
 
-	var io = require.main.require('./src/socket.io').server;
-	async.waterfall([
-		function (next) {
-			io.in('topic_' + tid).clients(next);
-		},
-		function (socketids, next) {
-			async.map(socketids, function (sid, next) {
-				io.of('/').adapter.clientRooms(sid, next);
-			}, next);
-		},
-		function (roomData, next) {
-			var uids = {};
+	try {
+		const socketids = await ioClients('topic_' + tid);
+		const roomData = await Promise.all(socketids.map(sid => ioClientRooms(sid)));
 
-			roomData.forEach(function(clientRooms) {
-				clientRooms.forEach(function (roomName) {
-					if (roomName.startsWith('uid_')) {
-						uids[roomName.split('_')[1]] = true;
-					}
-				});
+		var uids = {};
+
+		roomData.forEach(function(clientRooms) {
+			clientRooms.forEach(function (roomName) {
+				if (roomName.startsWith('uid_')) {
+					uids[roomName.split('_')[1]] = true;
+				}
 			});
+		});
 
-			if (uid) {
-				uids[uid] = true;
-			}
-
-			var userIds = Object.keys(uids).slice(0, 100);
-			user.getUsersFields(userIds, ['uid', 'username', 'userslug', 'picture', 'status'], next);
-		},
-		function (userData, next) {
-			userData = userData.filter(function (user) {
-				return user && parseInt(user.uid, 10) > 0 && user.status !== 'offline';
-			}).slice(0, 10);
-			cache.set('browsing:tid:' + tid, userData);
-			next(null, userData);
-		},
-	], function (err, userData) {
-		if (err) {
-			if (err.message === 'timeout reached while waiting for clients response') {
-				return callback(null, null);
-			} else {
-				return callback(err);
-			}
+		if (uid) {
+			uids[uid] = true;
 		}
-		callback(null, userData)
-	});
+		const settings = await meta.settings.get('browsing-users');
+		settings.numUsers = Math.min(100, settings.numUsers);
+
+		const userIds = Object.keys(uids).slice(0, 100);
+		let userData = await user.getUsersFields(userIds, ['uid', 'username', 'userslug', 'picture', 'status']);
+		userData = userData.filter(user => user && parseInt(user.uid, 10) > 0 && user.status !== 'offline').slice(0, settings.numUsers);
+		cache.set('browsing:tid:' + tid, userData);
+		return userData;
+	} catch (err) {
+		if (err.message === 'timeout reached while waiting for clients response') {
+			return null;
+		} else {
+			throw err;
+		}
+	}
 }
 
 

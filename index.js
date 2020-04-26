@@ -22,6 +22,15 @@ plugin.init = async function(hookData) {
 	routeHelpers.setupAdminPageRoute(hookData.router, '/admin/plugins/browsing-users', hookData.middleware, [], renderAdmin);
 };
 
+plugin.addAdminNavigation = async function(menu) {
+	menu.plugins.push({
+		route: '/plugins/browsing-users',
+		icon: 'fa-group',
+		name: 'Browsing Users'
+	});
+	return menu;
+};
+
 async function renderAdmin(req, res) {
 	res.render('admin/plugins/browsing-users', { best: 1 });
 }

@@ -1,7 +1,8 @@
 {
 	"library": "./index.js",
 	"hooks": [
-		{ "hook": "static:app.load", "method": "init" }
+		{ "hook": "static:app.load", "method": "init" },
+		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation"}
 	],
 	"scripts": [
 		"./lib/client.js"

@@ -32,7 +32,7 @@ plugin.addAdminNavigation = async function(menu) {
 };
 
 async function renderAdmin(req, res) {
-	res.render('admin/plugins/browsing-users', { best: 1 });
+	res.render('admin/plugins/browsing-users', { });
 }
 
 socketPlugins.browsingUsers = {};
@@ -78,7 +78,7 @@ async function getUsersInTopic(uid, tid) {
 			uids[uid] = true;
 		}
 		const settings = await meta.settings.get('browsing-users');
-		settings.numUsers = Math.min(100, settings.numUsers);
+		settings.numUsers = Math.min(100, settings.numUsers || 10);
 
 		const userIds = Object.keys(uids).slice(0, 100);
 		let userData = await user.getUsersFields(userIds, ['uid', 'username', 'userslug', 'picture', 'status']);

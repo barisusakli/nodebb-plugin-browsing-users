@@ -6,7 +6,7 @@ const util = require('util');
 const cache = LRU({
 	max: 500,
 	length: function () { return 1; },
-	maxAge: 10000
+	maxAge: 5000
 });
 
 const meta = require.main.require('./src/meta');

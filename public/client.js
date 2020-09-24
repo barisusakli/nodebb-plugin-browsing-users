@@ -72,8 +72,8 @@ $(document).ready(function () {
 					var $this = $(this);
 					var uid = parseInt($this.attr('data-uid'), 10);
 					if (!alreadyAddedUids.includes(uid)) {
-						app.createUserTooltips($this);
 						browsingUsersEl.append($this);
+						app.createUserTooltips(browsingUsersEl);
 					}
 				});
 

@@ -9,5 +9,8 @@
 	],
 	"acpScripts": [
 		"./public/admin/browsing-users.js"
+	],
+	"less": [
+		"public/style.less"
 	]
 }

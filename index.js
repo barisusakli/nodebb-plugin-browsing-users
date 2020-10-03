@@ -6,7 +6,7 @@ const util = require('util');
 const cache = LRU({
 	max: 500,
 	length: function () { return 1; },
-	maxAge: 2500
+	maxAge: 5000
 });
 
 const meta = require.main.require('./src/meta');
@@ -70,6 +70,10 @@ async function getUsersInTopic(uid, tid, composing) {
 	cache.set('browsing:composing:tid:' + tid, composingUsers)
 
 	if (browsingUsers.length && isUserInCache(browsingUsers, uid)) {
+		browsingUsers.forEach(function(user) {
+			user.composing = composingUsers.includes(user.uid);
+		});
+
 		return browsingUsers;
 	}
 

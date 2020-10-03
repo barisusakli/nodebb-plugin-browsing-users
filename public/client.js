@@ -4,42 +4,24 @@
 $(document).ready(function () {
 	'use strict';
 
-	var intervalId = 0;
-	var pollInProgress = false;
+
+	const MAX_INTERVAL = 5000;
+	const MIN_INTERVAL = 500;
+	const USERS_PER_INTERVAL_INCREASE = 10;
+
+	let interval = MIN_INTERVAL;
 
 	$(window).on('action:ajaxify.end', function (ev, data) {
-		if (ajaxify.data.template.topic) {
+		if (ajaxify.data.template.topic && app.user.uid) {
 			renderBrowsingUsers();
-			startPolling();
-		} else {
-			stopPolling();
+			setTimeout(renderBrowsingUsers, interval);
 		}
 	});
 
-	function startPolling() {
-		if (app.user.uid <= 0) {
-			return;
-		}
-		stopPolling();
-		intervalId = setInterval(renderBrowsingUsers, 2500);
-	}
-
-	function stopPolling() {
-		if (intervalId) {
-			clearInterval(intervalId);
-		}
-		pollInProgress = false;
-		intervalId = 0;
-	}
-
 	function renderBrowsingUsers() {
 		if (!ajaxify.data.tid || !ajaxify.data.template.topic) {
-			return stopPolling();
-		}
-		if (pollInProgress || app.user.uid <= 0) {
 			return;
 		}
-		pollInProgress = true;
 
 		socket.emit('plugins.browsingUsers.getBrowsingUsers', {
 			tid: ajaxify.data.tid,
@@ -49,7 +31,6 @@ $(document).ready(function () {
 				return app.alertError(err.message);
 			}
 			if (!data || !ajaxify.data.template.topic) {
-				pollInProgress = false;
 				return;
 			}
 
@@ -58,7 +39,7 @@ $(document).ready(function () {
 			}, function (html) {
 				var browsingUsersEl = $('[component="topic/browsing-users"]');
 				if (!browsingUsersEl.length) {
-					return stopPolling();
+					return;
 				}
 				var currentUids = data.map(function(user) { return parseInt(user.uid, 10); });
 				var alreadyAddedUids = [];
@@ -86,7 +67,8 @@ $(document).ready(function () {
 					browsingUsersEl.find('[data-uid="' + data[i].uid + '"] a').toggleClass('composing', !!data[i].composing);
 				}
 
-				pollInProgress = false;
+				interval = Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, Math.floor(currentUids.length / USERS_PER_INTERVAL_INCREASE) * MIN_INTERVAL));
+				setTimeout(renderBrowsingUsers, interval);
 			});
 		});
 	}

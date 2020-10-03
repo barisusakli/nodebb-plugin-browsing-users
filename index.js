@@ -82,7 +82,7 @@ async function getUsersInTopic(uid, tid, composing) {
 		roomData.forEach(function(clientRooms) {
 			clientRooms.forEach(function (roomName) {
 				if (roomName.startsWith('uid_')) {
-					uids[parseInt(roomName.split('_')[1], 10)] = true;
+					uids[roomName.split('_')[1]] = true;
 				}
 			});
 		});
@@ -104,9 +104,9 @@ async function getUsersInTopic(uid, tid, composing) {
 		let userData = await user.getUsersFields(userIds, ['uid', 'username', 'userslug', 'picture', 'status']);
 		userData = userData.filter(user => user && parseInt(user.uid, 10) > 0 && user.status !== 'offline').slice(0, settings.numUsers);
 		
-		for (var i = 0, ii = composingUsers.length; i < ii; i++) {
-			userData[i].composing = true;
-		}
+		userData.forEach(function(user) {
+			user.composing = composingUsers.includes(user.uid);
+		});
 
 		cache.set('browsing:tid:' + tid, userData);
 		return userData;

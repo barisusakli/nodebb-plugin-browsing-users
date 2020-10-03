@@ -21,7 +21,7 @@ $(document).ready(function () {
 			return;
 		}
 		stopPolling();
-		intervalId = setInterval(renderBrowsingUsers, 5000);
+		intervalId = setInterval(renderBrowsingUsers, 2500);
 	}
 
 	function stopPolling() {
@@ -40,7 +40,11 @@ $(document).ready(function () {
 			return;
 		}
 		pollInProgress = true;
-		socket.emit('plugins.browsingUsers.getBrowsingUsers', ajaxify.data.tid, function (err, data) {
+
+		socket.emit('plugins.browsingUsers.getBrowsingUsers', {
+			tid: ajaxify.data.tid,
+			composing: !!$('[component="composer"]').length,
+		}, function (err, data) {
 			if (err) {
 				return app.alertError(err.message);
 			}
@@ -48,6 +52,7 @@ $(document).ready(function () {
 				pollInProgress = false;
 				return;
 			}
+
 			app.parseAndTranslate('partials/topic/browsing-users', 'browsingUsers', {
 				browsingUsers: data
 			}, function (html) {
@@ -76,6 +81,10 @@ $(document).ready(function () {
 						app.createUserTooltips(browsingUsersEl);
 					}
 				});
+
+				for (var i = 0, ii=data.length; i< ii; i++) {
+					browsingUsersEl.find('[data-uid="' + data[i].uid + '"] a').toggleClass('composing', !!data[i].composing);
+				}
 
 				pollInProgress = false;
 			});

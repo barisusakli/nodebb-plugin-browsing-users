@@ -6,7 +6,7 @@ const util = require('util');
 const cache = LRU({
 	max: 500,
 	length: function () { return 1; },
-	maxAge: 5000
+	maxAge: 2500
 });
 
 const meta = require.main.require('./src/meta');
@@ -36,12 +36,12 @@ async function renderAdmin(req, res) {
 }
 
 socketPlugins.browsingUsers = {};
-socketPlugins.browsingUsers.getBrowsingUsers = async function(socket, tid) {
-	const canRead = await privileges.topics.can('read', tid, socket.uid);
+socketPlugins.browsingUsers.getBrowsingUsers = async function(socket, data) {
+	const canRead = await privileges.topics.can('read', data.tid, socket.uid);
 	if (!canRead) {
 		throw new Error('[[error:no-privileges]]');
 	}
-	return await getUsersInTopic(socket.uid, tid);
+	return await getUsersInTopic(socket.uid, data.tid, data.composing);
 };
 
 function isUserInCache(browsingUsers, uid) {
@@ -54,9 +54,27 @@ function isUserInCache(browsingUsers, uid) {
 const ioClients = util.promisify((room, callback) => socketIO.server.in(room).clients(callback));
 const ioClientRooms = util.promisify((sid, callback) => socketIO.server.of('/').adapter.clientRooms(sid, callback));
 
-async function getUsersInTopic(uid, tid) {
-	var browsingUsers = cache.peek('browsing:tid:' + tid);
-	if (browsingUsers && isUserInCache(browsingUsers, uid)) {
+
+async function getUsersInTopic(uid, tid, composing) {
+	var browsingUsers = cache.peek('browsing:tid:' + tid) || [];
+	var composingUsers = cache.peek('browsing:composing:tid:' + tid) || [];
+	
+	if (composing) {
+		if (!composingUsers.includes(uid)) {
+			composingUsers.push(uid);
+		}
+	} else {
+		composingUsers = composingUsers.filter(x => x !== uid);
+	}
+
+	cache.set('browsing:composing:tid:' + tid, composingUsers)
+
+	if (browsingUsers.length && isUserInCache(browsingUsers, uid)) {
+		browsingUsers.forEach(function(user) {
+			if (user.uid === uid && composing) {
+				user.composing = true;
+			}
+		});
 		return browsingUsers;
 	}
 
@@ -69,7 +87,7 @@ async function getUsersInTopic(uid, tid) {
 		roomData.forEach(function(clientRooms) {
 			clientRooms.forEach(function (roomName) {
 				if (roomName.startsWith('uid_')) {
-					uids[roomName.split('_')[1]] = true;
+					uids[parseInt(roomName.split('_')[1], 10)] = true;
 				}
 			});
 		});
@@ -80,9 +98,21 @@ async function getUsersInTopic(uid, tid) {
 		const settings = await meta.settings.get('browsing-users');
 		settings.numUsers = Math.min(100, settings.numUsers || 10);
 
-		const userIds = Object.keys(uids).slice(0, 100);
+		var userIds = Object.keys(uids).map(function(x) {
+			return parseInt(x, 10)
+		});
+		// bump composing users to the front of the queue
+		var intersection = userIds.filter(x => composingUsers.includes(x));
+		var remainder = userIds.filter(x => !composingUsers.includes(x));
+		userIds = intersection.concat(remainder).slice(0, 100);
+		
 		let userData = await user.getUsersFields(userIds, ['uid', 'username', 'userslug', 'picture', 'status']);
 		userData = userData.filter(user => user && parseInt(user.uid, 10) > 0 && user.status !== 'offline').slice(0, settings.numUsers);
+		
+		for (var i = 0, ii = composingUsers.length; i < ii; i++) {
+			userData[i].composing = true;
+		}
+
 		cache.set('browsing:tid:' + tid, userData);
 		return userData;
 	} catch (err) {

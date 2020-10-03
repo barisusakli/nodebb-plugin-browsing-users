@@ -2,4 +2,42 @@
 	[component="topic/browsing-users"] {
 		vertical-align: -2px;
 	}
+	
+	[component="topic/browsing-users"] {
+		text-transform: initial;
+	}
+	[component="topic/browsing-users"] [data-uid] a {
+		position: relative;
+	}
+	[component="topic/browsing-users"] [data-uid] a img,
+	[component="topic/browsing-users"] [data-uid] a .user-icon {
+		border-radius: 50%;
+		width: 20px;
+		height: 20px;
+		line-height: 20px;
+		font-size: 1rem;
+		vertical-align: middle;
+		margin: 0 7px;
+	}
+	[component="topic/browsing-users"] [data-uid] a::after {
+		position: absolute;
+		z-index: -1;
+		opacity: 0;
+		font-family: "FontAwesome";
+		content: "\f11c";
+		padding: 4px 0.25em;
+		top: 0;
+		left: 0px;
+		font-size: 15px;
+		-webkit-transition: opacity ease 250ms, top ease 250ms;
+		-o-transition: opacity ease 250ms, top ease 250ms;
+		transition: opacity ease 250ms, top ease 250ms;
+	}
+	[component="topic/browsing-users"] [data-uid] a.composing::after {
+		opacity: 1;
+		top: 16px;
+		-webkit-animation: topic-reply-pulse 2s ease-in infinite;
+		-o-animation: topic-reply-pulse 2s ease-in infinite;
+		animation: topic-reply-pulse 2s ease-in infinite;
+	}
 }

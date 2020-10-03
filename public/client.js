@@ -14,7 +14,6 @@ $(document).ready(function () {
 	$(window).on('action:ajaxify.end', function (ev, data) {
 		if (ajaxify.data.template.topic && app.user.uid) {
 			renderBrowsingUsers();
-			setTimeout(renderBrowsingUsers, interval);
 		}
 	});
 

@@ -70,11 +70,6 @@ async function getUsersInTopic(uid, tid, composing) {
 	cache.set('browsing:composing:tid:' + tid, composingUsers)
 
 	if (browsingUsers.length && isUserInCache(browsingUsers, uid)) {
-		browsingUsers.forEach(function(user) {
-			if (user.uid === uid && composing) {
-				user.composing = true;
-			}
-		});
 		return browsingUsers;
 	}
 

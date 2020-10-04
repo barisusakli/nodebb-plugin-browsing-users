@@ -8,16 +8,14 @@
 	}
 	[component="topic/browsing-users"] [data-uid] a {
 		position: relative;
+		display: block;
 	}
-	[component="topic/browsing-users"] [data-uid] a img,
-	[component="topic/browsing-users"] [data-uid] a .user-icon {
-		border-radius: 50%;
-		width: 20px;
-		height: 20px;
-		line-height: 20px;
-		font-size: 1rem;
-		vertical-align: middle;
-		margin: 0 7px;
+
+	[component="topic/browsing-users"] [data-uid] a .avatar {
+		vertical-align: top;
+	}
+	[component="topic/browsing-users"] [data-uid] a img.avatar {
+		//position: absolute;
 	}
 	[component="topic/browsing-users"] [data-uid] a::after {
 		position: absolute;

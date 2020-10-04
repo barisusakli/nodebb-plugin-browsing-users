@@ -4,56 +4,41 @@
 $(document).ready(function () {
 	'use strict';
 
-	var intervalId = 0;
-	var pollInProgress = false;
+
+	const MAX_INTERVAL = 5000;
+	const MIN_INTERVAL = 500;
+	const USERS_PER_INTERVAL_INCREASE = 10;
+
+	let interval = MIN_INTERVAL;
 
 	$(window).on('action:ajaxify.end', function (ev, data) {
-		if (ajaxify.data.template.topic) {
+		if (ajaxify.data.template.topic && app.user.uid) {
 			renderBrowsingUsers();
-			startPolling();
-		} else {
-			stopPolling();
 		}
 	});
 
-	function startPolling() {
-		if (app.user.uid <= 0) {
-			return;
-		}
-		stopPolling();
-		intervalId = setInterval(renderBrowsingUsers, 5000);
-	}
-
-	function stopPolling() {
-		if (intervalId) {
-			clearInterval(intervalId);
-		}
-		pollInProgress = false;
-		intervalId = 0;
-	}
-
 	function renderBrowsingUsers() {
 		if (!ajaxify.data.tid || !ajaxify.data.template.topic) {
-			return stopPolling();
-		}
-		if (pollInProgress || app.user.uid <= 0) {
 			return;
 		}
-		pollInProgress = true;
-		socket.emit('plugins.browsingUsers.getBrowsingUsers', ajaxify.data.tid, function (err, data) {
+
+		socket.emit('plugins.browsingUsers.getBrowsingUsers', {
+			tid: ajaxify.data.tid,
+			composing: !!$('[component="composer"]').length,
+		}, function (err, data) {
 			if (err) {
 				return app.alertError(err.message);
 			}
 			if (!data || !ajaxify.data.template.topic) {
-				pollInProgress = false;
 				return;
 			}
+
 			app.parseAndTranslate('partials/topic/browsing-users', 'browsingUsers', {
 				browsingUsers: data
 			}, function (html) {
 				var browsingUsersEl = $('[component="topic/browsing-users"]');
 				if (!browsingUsersEl.length) {
-					return stopPolling();
+					return;
 				}
 				var currentUids = data.map(function(user) { return parseInt(user.uid, 10); });
 				var alreadyAddedUids = [];
@@ -77,7 +62,12 @@ $(document).ready(function () {
 					}
 				});
 
-				pollInProgress = false;
+				for (var i = 0, ii=data.length; i< ii; i++) {
+					browsingUsersEl.find('[data-uid="' + data[i].uid + '"] a').toggleClass('composing', !!data[i].composing);
+				}
+
+				interval = Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, Math.floor(currentUids.length / USERS_PER_INTERVAL_INCREASE) * MIN_INTERVAL));
+				setTimeout(renderBrowsingUsers, interval);
 			});
 		});
 	}

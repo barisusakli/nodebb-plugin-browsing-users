@@ -6,7 +6,8 @@ $(document).ready(function () {
 
 
 	const MAX_INTERVAL = 5000;
-	const MIN_INTERVAL = 500;
+	const MIN_INTERVAL = 2500;
+	const INTERVAL_STEP = 500;
 	const USERS_PER_INTERVAL_INCREASE = 10;
 
 	let interval = MIN_INTERVAL;
@@ -66,7 +67,7 @@ $(document).ready(function () {
 					browsingUsersEl.find('[data-uid="' + data[i].uid + '"] a').toggleClass('composing', !!data[i].composing);
 				}
 
-				interval = Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, Math.floor(currentUids.length / USERS_PER_INTERVAL_INCREASE) * MIN_INTERVAL));
+				interval = Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, Math.floor(currentUids.length / USERS_PER_INTERVAL_INCREASE) * INTERVAL_STEP));
 				setTimeout(renderBrowsingUsers, interval);
 			});
 		});

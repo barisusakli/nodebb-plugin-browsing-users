@@ -1,10 +1,8 @@
+'use strict';
 
-/* globals app, ajaxify, socket */
+/* globals $, window, document, app, ajaxify, socket */
 
 $(document).ready(function () {
-	'use strict';
-
-
 	const MAX_INTERVAL = 5000;
 	const MIN_INTERVAL = 2500;
 	const INTERVAL_STEP = 500;
@@ -12,7 +10,7 @@ $(document).ready(function () {
 
 	let interval = MIN_INTERVAL;
 
-	$(window).on('action:ajaxify.end', function (ev, data) {
+	$(window).on('action:ajaxify.end', function () {
 		if (ajaxify.data.template.topic && app.user.uid) {
 			renderBrowsingUsers();
 		}
@@ -34,24 +32,33 @@ $(document).ready(function () {
 				return;
 			}
 
+			var currentUids = data.map(function (user) { return parseInt(user.uid, 10); });
+
+			var alreadyAddedUids = [];
+			var browsingUsersEl = $('[component="topic/browsing-users"]');
+			// remove any users that are no longer in topic
+			browsingUsersEl.find('[data-uid]').each(function () {
+				var uid = parseInt($(this).attr('data-uid'), 10);
+				if (!currentUids.includes(uid)) {
+					$(this).remove();
+				} else {
+					alreadyAddedUids.push(uid);
+				}
+			});
+
+			if (noChanges(currentUids, alreadyAddedUids)) {
+				showComposing(browsingUsersEl, data);
+				startTimeout(currentUids);
+				return;
+			}
+
 			app.parseAndTranslate('partials/topic/browsing-users', 'browsingUsers', {
-				browsingUsers: data
+				browsingUsers: data,
 			}, function (html) {
 				var browsingUsersEl = $('[component="topic/browsing-users"]');
 				if (!browsingUsersEl.length) {
 					return;
 				}
-				var currentUids = data.map(function(user) { return parseInt(user.uid, 10); });
-				var alreadyAddedUids = [];
-				// remove any users that are no longer in topic
-				browsingUsersEl.find('[data-uid]').each(function () {
-					var uid = parseInt($(this).attr('data-uid'), 10);
-					if (!currentUids.includes(uid)) {
-						$(this).remove();
-					} else {
-						alreadyAddedUids.push(uid);
-					}
-				});
 
 				// add any new users
 				html.filter('[data-uid]').each(function () {
@@ -63,13 +70,34 @@ $(document).ready(function () {
 					}
 				});
 
-				for (var i = 0, ii=data.length; i< ii; i++) {
-					browsingUsersEl.find('[data-uid="' + data[i].uid + '"] a').toggleClass('composing', !!data[i].composing);
-				}
+				showComposing(browsingUsersEl, data);
 
-				interval = Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, Math.floor(currentUids.length / USERS_PER_INTERVAL_INCREASE) * INTERVAL_STEP));
-				setTimeout(renderBrowsingUsers, interval);
+				startTimeout(currentUids);
 			});
 		});
+	}
+
+	function startTimeout(currentUids) {
+		interval = Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, Math.floor(currentUids.length / USERS_PER_INTERVAL_INCREASE) * INTERVAL_STEP));
+		setTimeout(renderBrowsingUsers, interval);
+	}
+
+	function showComposing(browsingUsersEl, data) {
+		for (var i = 0, ii = data.length; i < ii; i++) {
+			browsingUsersEl.find('[data-uid="' + data[i].uid + '"] a').toggleClass('composing', !!data[i].composing);
+		}
+	}
+
+	function noChanges(currentUids, alreadyDisplayedUids) {
+		if (currentUids.length !== alreadyDisplayedUids.length) {
+			return false;
+		}
+
+		for (var i = 0; i < currentUids.length; i++) {
+			if (currentUids[i] !== alreadyDisplayedUids[i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 });

@@ -64,7 +64,7 @@ $(document).ready(function () {
 				html.filter('[data-uid]').each(function () {
 					var $this = $(this);
 					var uid = parseInt($this.attr('data-uid'), 10);
-					if (!alreadyAddedUids.includes(uid)) {
+					if (!alreadyAddedUids.includes(uid) && !browsingUsersEl.find('[data-uid=' + uid + ']').length) {
 						browsingUsersEl.append($this);
 						app.createUserTooltips(browsingUsersEl);
 					}

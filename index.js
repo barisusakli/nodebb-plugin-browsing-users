@@ -79,11 +79,13 @@ async function getUsersInTopic(uid, tid, composing) {
 		const uids = {};
 
 		roomData.forEach(function (clientRooms) {
-			clientRooms.forEach(function (roomName) {
-				if (roomName.startsWith('uid_')) {
-					uids[roomName.split('_')[1]] = true;
-				}
-			});
+			if (Array.isArray(clientRooms)) {
+				clientRooms.forEach(function (roomName) {
+					if (roomName.startsWith('uid_')) {
+						uids[roomName.split('_')[1]] = true;
+					}
+				});
+			}
 		});
 
 		if (uid) {

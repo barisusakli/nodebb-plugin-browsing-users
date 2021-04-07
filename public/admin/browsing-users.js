@@ -1,16 +1,22 @@
-define('admin/plugins/browsing-users', ['settings'],  function (settings) {
-    var browsingUsers = {};
+'use strict';
 
-    browsingUsers.init = function () {
-        var settingsForm = $('.browsing-users-settings');
-        settings.load('browsing-users', settingsForm);
+/* globals $, app, define */
 
-        $('#save').on('click', function () {
+define('admin/plugins/browsing-users', ['settings'], function (settings) {
+	const browsingUsers = {};
+
+	browsingUsers.init = function () {
+		const settingsForm = $('.browsing-users-settings');
+		settings.load('browsing-users', settingsForm);
+		// ugly workaround
+		$('option[value="guests"], option[value="spiders"]').hide();
+
+		$('#save').on('click', function () {
 			settings.save('browsing-users', settingsForm, function () {
 				app.alertSuccess('Settings saved!');
 			});
 		});
-    };
+	};
 
-    return browsingUsers;
+	return browsingUsers;
 });

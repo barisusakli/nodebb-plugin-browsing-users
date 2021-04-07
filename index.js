@@ -1,6 +1,7 @@
 'use strict';
 
 const LRU = require('lru-cache');
+const winston = require.main.require('winston');
 
 const cache = LRU({
 	max: 500,
@@ -8,12 +9,14 @@ const cache = LRU({
 	maxAge: 5000,
 });
 
+const groups = require.main.require('./src/groups');
 const meta = require.main.require('./src/meta');
 const user = require.main.require('./src/user');
 const privileges = require.main.require('./src/privileges');
 const socketPlugins = require.main.require('./src/socket.io/plugins');
 const routeHelpers = require.main.require('./src/routes/helpers');
 const socketIO = require.main.require('./src/socket.io');
+const widgets = require.main.require('./src/widgets');
 
 const plugin = module.exports;
 
@@ -31,7 +34,9 @@ plugin.addAdminNavigation = async function (menu) {
 };
 
 async function renderAdmin(req, res) {
-	res.render('admin/plugins/browsing-users', { });
+	const groupsData = await groups.getNonPrivilegeGroups('groups:createtime', 0, -1);
+	groupsData.sort((a, b) => b.system - a.system);
+	res.render('admin/plugins/browsing-users', { groups: groupsData });
 }
 
 socketPlugins.browsingUsers = {};
@@ -40,8 +45,32 @@ socketPlugins.browsingUsers.getBrowsingUsers = async function (socket, data) {
 	if (!canRead) {
 		throw new Error('[[error:no-privileges]]');
 	}
+
+	const settings = await getSettings();
+	const isVisible = await widgets.checkVisibility(settings, socket.uid);
+	if (!isVisible) {
+		return [];
+	}
+
 	return await getUsersInTopic(socket.uid, data.tid, data.composing);
 };
+
+async function getSettings() {
+	const _settings = await meta.settings.get('browsing-users');
+	const settings = {
+		groups: [],
+		groupsHideFrom: [],
+	};
+
+	try {
+		settings.groups = _settings.groups ? JSON.parse(_settings.groups) : [];
+		settings.groupsHideFrom = _settings.groupsHideFrom ? JSON.parse(_settings.groupsHideFrom) : [];
+	} catch (e) {
+		winston.warn('[browsing-users/getSettings] Groups settings are invalid.');
+	}
+
+	return { ..._settings, ...settings };
+}
 
 function isUserInCache(browsingUsers, uid) {
 	if (parseInt(uid, 10) <= 0) {

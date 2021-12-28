@@ -132,6 +132,7 @@ async function getUsersInTopic(uid, tid, composing) {
 
 		let userData = await user.getUsersFields(userIds, ['uid', 'username', 'userslug', 'picture', 'status']);
 		userData = userData.filter(user => user && parseInt(user.uid, 10) > 0 && user.status !== 'offline').slice(0, settings.numUsers);
+		userData = await user.blocks.filter(uid, userData);
 
 		userData.forEach(function (user) {
 			user.composing = composingUsers.includes(user.uid);

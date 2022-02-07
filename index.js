@@ -33,6 +33,13 @@ plugin.addAdminNavigation = async function (menu) {
 	return menu;
 };
 
+plugin.filterTopicBuild = async function (hookData) {
+	// browsing users are rendered via websockets,
+	// this is just here so theme can check for plugin and import partial, see persona topic.tpl
+	hookData.templateData.browsingUsers = true;
+	return hookData;
+};
+
 async function renderAdmin(req, res) {
 	const groupsData = await groups.getNonPrivilegeGroups('groups:createtime', 0, -1);
 	groupsData.sort((a, b) => b.system - a.system);

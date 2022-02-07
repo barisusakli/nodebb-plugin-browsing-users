@@ -2,8 +2,10 @@
 	"library": "./index.js",
 	"hooks": [
 		{ "hook": "static:app.load", "method": "init" },
-		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation"}
+		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation"},
+		{ "hook": "filter:topic.build", "method": "filterTopicBuild" }
 	],
+	"templates": "templates",
 	"scripts": [
 		"./public/client.js"
 	],

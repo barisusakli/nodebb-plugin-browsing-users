@@ -1,8 +1,8 @@
 'use strict';
 
-/* globals $, app, define */
+/* globals $, define */
 
-define('admin/plugins/browsing-users', ['settings'], function (settings) {
+define('admin/plugins/browsing-users', ['settings', 'alerts'], function (settings, alerts) {
 	const browsingUsers = {};
 
 	browsingUsers.init = function () {
@@ -13,7 +13,7 @@ define('admin/plugins/browsing-users', ['settings'], function (settings) {
 
 		$('#save').on('click', function () {
 			settings.save('browsing-users', settingsForm, function () {
-				app.alertSuccess('Settings saved!');
+				alerts.success('Settings saved!');
 			});
 		});
 	};

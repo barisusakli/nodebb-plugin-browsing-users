@@ -10,7 +10,7 @@
 		"./public/client.js"
 	],
 	"modules": {
-		"admin/plugins/browsing-users.js": "./public/admin/browsing-users.js"
+		"../admin/plugins/browsing-users.js": "./public/admin/browsing-users.js"
 	},
 	"less": [
 		"public/style.less"

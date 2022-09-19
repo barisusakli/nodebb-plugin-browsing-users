@@ -1,8 +1,8 @@
 <form role="form" class="browsing-users-settings">
-	<div class="row">
-		<div class="col-sm-6 col-xs-12">
-			<div class="form-group">
-				<label>Number of users to display</label>
+	<div class="row mb-4">
+		<div class="col-sm-6 col-12">
+			<div>
+				<label class="form-label">Number of users to display</label>
                 <input id="numUsers" name="numUsers" type="text" class="form-control">
 			</div>
 		</div>

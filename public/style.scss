@@ -1,18 +1,10 @@
 .page-topic {
 	[component="topic/browsing-users"] {
-		vertical-align: -2px;
-	}
-
-	[component="topic/browsing-users"] {
 		text-transform: initial;
 	}
 	[component="topic/browsing-users"] [data-uid] a {
 		position: relative;
 		display: block;
-	}
-
-	[component="topic/browsing-users"] [data-uid] a .avatar {
-		vertical-align: top;
 	}
 
 	[component="topic/browsing-users"] [data-uid] a::after {

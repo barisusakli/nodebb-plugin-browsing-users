@@ -12,7 +12,7 @@
 	"modules": {
 		"../admin/plugins/browsing-users.js": "./public/admin/browsing-users.js"
 	},
-	"less": [
-		"public/style.less"
+	"scss": [
+		"public/style.scss"
 	]
 }

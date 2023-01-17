@@ -1,7 +1,7 @@
-<div component="topic/browsing-users" class="d-inline-block">
+<div component="topic/browsing-users" class="d-flex gap-1">
 	{{{ each browsingUsers }}}
-	<div class="float-start" data-uid="{browsingUsers.uid}">
-		<a href="{{{ if browsingUsers.userslug }}}{config.relative_path}/user/{browsingUsers.userslug}{{{ else }}}#{{{ end }}}">
+	<div data-uid="{./uid}">
+		<a href="{{{ if ./userslug }}}{config.relative_path}/user/{./userslug}{{{ else }}}#{{{ end }}}">
 			{buildAvatar(browsingUsers, "24px", true)}
 		</a>
 	</div>

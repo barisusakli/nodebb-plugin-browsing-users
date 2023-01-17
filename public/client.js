@@ -17,7 +17,7 @@ $(document).ready(function () {
 	});
 
 	function renderBrowsingUsers() {
-		if (!ajaxify.data.tid || !ajaxify.data.template.topic) {
+		if (!ajaxify.data.tid || !ajaxify.data.template.topic || !app.isFocused) {
 			return;
 		}
 		require(['alerts'], function (alerts) {

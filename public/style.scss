@@ -7,7 +7,7 @@
 		display: block;
 	}
 
-	[component="topic/browsing-users"] [data-uid] a::after {
+	[component="topic/browsing-users"] [data-uid] a .compose-icon {
 		position: absolute;
 		opacity: 0;
 		font-family: "FontAwesome";
@@ -20,7 +20,7 @@
 		-o-transition: opacity ease 250ms, top ease 250ms;
 		transition: opacity ease 250ms, top ease 250ms;
 	}
-	[component="topic/browsing-users"] [data-uid] a.composing::after {
+	[component="topic/browsing-users"] [data-uid] a.composing .compose-icon {
 		opacity: 1;
 		top: 16px;
 		-webkit-animation: topic-reply-pulse 2s ease-in infinite;

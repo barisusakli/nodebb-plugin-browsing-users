@@ -2,7 +2,7 @@
 	{{{ each browsingUsers }}}
 	<div data-uid="{./uid}">
 		<a href="{{{ if ./userslug }}}{config.relative_path}/user/{./userslug}{{{ else }}}#{{{ end }}}">
-			{buildAvatar(browsingUsers, "24px", true)}
+			{buildAvatar(browsingUsers, "24px", true, "avatar-tooltip")}
 		</a>
 	</div>
 	{{{ end }}}

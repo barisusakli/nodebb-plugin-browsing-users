@@ -21,7 +21,7 @@ const widgets = require.main.require('./src/widgets');
 const plugin = module.exports;
 
 plugin.init = async function (hookData) {
-	routeHelpers.setupAdminPageRoute(hookData.router, '/admin/plugins/browsing-users', hookData.middleware, [], renderAdmin);
+	routeHelpers.setupAdminPageRoute(hookData.router, '/admin/plugins/browsing-users', renderAdmin);
 };
 
 plugin.addAdminNavigation = async function (menu) {

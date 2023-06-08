@@ -43,7 +43,10 @@ plugin.filterTopicBuild = async function (hookData) {
 async function renderAdmin(req, res) {
 	const groupsData = await groups.getNonPrivilegeGroups('groups:createtime', 0, -1);
 	groupsData.sort((a, b) => b.system - a.system);
-	res.render('admin/plugins/browsing-users', { groups: groupsData });
+	res.render('admin/plugins/browsing-users', {
+		groups: groupsData,
+		title: 'Browsing Users',
+	});
 }
 
 socketPlugins.browsingUsers = {};

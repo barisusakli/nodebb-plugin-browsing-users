@@ -2,7 +2,7 @@
 
 /* globals $, define */
 
-define('admin/plugins/browsing-users', ['settings', 'alerts'], function (settings, alerts) {
+define('admin/plugins/browsing-users', ['settings'], function (settings) {
 	const browsingUsers = {};
 
 	browsingUsers.init = function () {
@@ -12,9 +12,7 @@ define('admin/plugins/browsing-users', ['settings', 'alerts'], function (setting
 		$('option[value="guests"], option[value="spiders"]').hide();
 
 		$('#save').on('click', function () {
-			settings.save('browsing-users', settingsForm, function () {
-				alerts.success('Settings saved!');
-			});
+			settings.save('browsing-users', settingsForm);
 		});
 	};
 

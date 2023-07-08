@@ -112,21 +112,15 @@ async function getUsersInTopic(uid, tid, composing) {
 	}
 
 	try {
-		const socketids = Array.from(await socketIO.server.in('topic_' + tid).allSockets());
-		const roomData = await Promise.all(socketids.map(sid => socketIO.server.of('/').adapter.socketRooms(sid)));
-
+		const sockets = await socketIO.server.in(`topic_${tid}`).fetchSockets();
 		const uids = {};
-
-		roomData.forEach(function (clientRooms) {
-			if (clientRooms && clientRooms.forEach) {
-				clientRooms.forEach(function (roomName) {
-					if (roomName.startsWith('uid_')) {
-						uids[roomName.split('_')[1]] = true;
-					}
-				});
+		for (const s of sockets) {
+			for (const room of s.rooms) {
+				if (room.startsWith('uid_')) {
+					uids[room.split('_')[1]] = true;
+				}
 			}
-		});
-
+		}
 		if (uid) {
 			uids[uid] = true;
 		}

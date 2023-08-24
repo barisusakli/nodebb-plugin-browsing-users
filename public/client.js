@@ -66,7 +66,6 @@ $(document).ready(function () {
 						var uid = parseInt($this.attr('data-uid'), 10);
 						if (!alreadyAddedUids.includes(uid) && !browsingUsersEl.find('[data-uid=' + uid + ']').length) {
 							browsingUsersEl.append($this);
-							app.createUserTooltips(browsingUsersEl);
 						}
 					});
 

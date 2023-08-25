@@ -1,12 +1,11 @@
 'use strict';
 
-const LRU = require('lru-cache');
+const { LRUCache } = require('lru-cache');
 const winston = require.main.require('winston');
 
-const cache = LRU({
+const cache = new LRUCache({
 	max: 500,
-	length: function () { return 1; },
-	maxAge: 5000,
+	ttl: 5000,
 });
 
 const groups = require.main.require('./src/groups');
@@ -62,7 +61,7 @@ socketPlugins.browsingUsers.getBrowsingUsers = async function (socket, data) {
 		return [];
 	}
 
-	return await getUsersInTopic(socket.uid, data.tid, data.composing);
+	return await getUsersInTopic(socket, data, settings);
 };
 
 async function getSettings() {
@@ -89,57 +88,47 @@ function isUserInCache(browsingUsers, uid) {
 	return browsingUsers.find(user => parseInt(user.uid, 10) === parseInt(uid, 10));
 }
 
-async function getUsersInTopic(uid, tid, composing) {
-	const browsingUsers = cache.peek('browsing:tid:' + tid) || [];
-	let composingUsers = cache.peek('browsing:composing:tid:' + tid) || [];
-
-	if (composing) {
-		if (!composingUsers.includes(uid)) {
-			composingUsers.push(uid);
-		}
-	} else {
-		composingUsers = composingUsers.filter(x => x !== uid);
-	}
-
-	cache.set('browsing:composing:tid:' + tid, composingUsers);
+async function getUsersInTopic(socket, data, settings) {
+	const uid = socket.uid;
+	const { tid, composing } = data;
+	const browsingUsers = cache.get('browsing:tid:' + tid) || [];
+	const composingUids = [];
+	socket.data.composing = composing ? Date.now() + 5000 : 0;
 
 	if (browsingUsers.length && isUserInCache(browsingUsers, uid)) {
-		browsingUsers.forEach(function (user) {
-			user.composing = composingUsers.includes(user.uid);
-		});
-
 		return browsingUsers;
 	}
 
 	try {
 		const sockets = await socketIO.server.in(`topic_${tid}`).fetchSockets();
-		const uids = {};
+		const uids = [];
 		for (const s of sockets) {
-			for (const room of s.rooms) {
-				if (room.startsWith('uid_')) {
-					uids[room.split('_')[1]] = true;
+			if (s.data.uid > 0) {
+				uids.push(s.data.uid);
+				if (s.data.composing && s.data.composing > Date.now()) {
+					composingUids.push(s.data.uid);
 				}
 			}
 		}
-		if (uid) {
-			uids[uid] = true;
-		}
-		const settings = await meta.settings.get('browsing-users');
+
 		settings.numUsers = Math.min(100, settings.numUsers || 10);
 
-		let userIds = Object.keys(uids).map(x => parseInt(x, 10));
+		let userIds = uids.map(uid => parseInt(uid, 10));
 
 		// bump composing users to the front of the queue
-		const intersection = userIds.filter(x => composingUsers.includes(x));
-		const remainder = userIds.filter(x => !composingUsers.includes(x));
+		const intersection = userIds.filter(uid => composingUids.includes(uid));
+		const remainder = userIds.filter(uid => !composingUids.includes(uid));
 		userIds = intersection.concat(remainder).slice(0, 100);
 
-		let userData = await user.getUsersFields(userIds, ['uid', 'username', 'userslug', 'picture', 'status']);
-		userData = userData.filter(user => user && parseInt(user.uid, 10) > 0 && user.status !== 'offline').slice(0, settings.numUsers);
-		userData = await user.blocks.filter(uid, userData);
+		let userData = await user.getUsersFields(userIds, [
+			'uid', 'username', 'userslug', 'picture', 'status',
+		]);
+		userData = userData.filter(
+			u => u && parseInt(u.uid, 10) > 0 && u.status !== 'offline'
+		).slice(0, settings.numUsers);
 
 		userData.forEach(function (user) {
-			user.composing = composingUsers.includes(user.uid);
+			user.composing = composingUids.includes(user.uid);
 		});
 
 		cache.set('browsing:tid:' + tid, userData);

@@ -17,8 +17,11 @@ $(document).ready(function () {
 	});
 
 	function renderBrowsingUsers() {
-		if (!ajaxify.data.tid || !ajaxify.data.template.topic || !app.isFocused) {
+		if (!ajaxify.data.tid || !ajaxify.data.template.topic) {
 			return;
+		}
+		if (!app.isFocused) {
+			return startTimeout([]);
 		}
 		require(['alerts'], function (alerts) {
 			socket.emit('plugins.browsingUsers.getBrowsingUsers', {
@@ -31,13 +34,13 @@ $(document).ready(function () {
 				if (!data || !ajaxify.data.template.topic) {
 					return;
 				}
-
-				var currentUids = data.map(function (user) { return parseInt(user.uid, 10); });
+				data = data.filter(u => !app.user.blocks.includes(u.uid));
+				var currentUids = data.map(u => parseInt(u.uid, 10));
 
 				var alreadyAddedUids = [];
 				var browsingUsersEl = $('[component="topic/browsing-users"]');
 				// remove any users that are no longer in topic
-				browsingUsersEl.find('[data-uid]').each(function () {
+				browsingUsersEl.find('>[data-uid]').each(function () {
 					var uid = parseInt($(this).attr('data-uid'), 10);
 					if (!currentUids.includes(uid)) {
 						$(this).remove();
@@ -64,13 +67,16 @@ $(document).ready(function () {
 					html.filter('[data-uid]').each(function () {
 						var $this = $(this);
 						var uid = parseInt($this.attr('data-uid'), 10);
-						if (!alreadyAddedUids.includes(uid) && !browsingUsersEl.find('[data-uid=' + uid + ']').length) {
+						const existingEl = browsingUsersEl.find('>[data-uid=' + uid + ']');
+						if (
+							!alreadyAddedUids.includes(uid) &&
+							!existingEl.length
+						) {
 							browsingUsersEl.append($this);
 						}
 					});
 
 					showComposing(browsingUsersEl, data);
-
 					startTimeout(currentUids);
 				});
 			});
@@ -82,10 +88,17 @@ $(document).ready(function () {
 		setTimeout(renderBrowsingUsers, interval);
 	}
 
-	function showComposing(browsingUsersEl, data) {
-		for (var i = 0, ii = data.length; i < ii; i++) {
-			browsingUsersEl.find('[data-uid="' + data[i].uid + '"] a').toggleClass('composing', !!data[i].composing);
-		}
+	function showComposing(browsingUsersEl, users) {
+		users.forEach((user) => {
+			const userEls = browsingUsersEl.find('>[data-uid="' + user.uid + '"]');
+			userEls.each((idx, el) => {
+				if (user.composing) {
+					const $el = $(el);
+					$el.prependTo($el.parent());
+				}
+			});
+			userEls.find('a').toggleClass('composing', !!user.composing);
+		});
 	}
 
 	function noChanges(currentUids, alreadyDisplayedUids) {

@@ -101,11 +101,11 @@ async function getUsersInTopic(socket, data, settings) {
 
 	try {
 		const sockets = await socketIO.server.in(`topic_${tid}`).fetchSockets();
-		const uids = [];
+		const uids = {};
 		for (const s of sockets) {
 			if (s.data.uid > 0) {
-				uids.push(s.data.uid);
-				if (s.data.composing && s.data.composing > Date.now()) {
+				uids[s.data.uid] = 1;
+				if (s.data.composing && s.data.composing > Date.now() && !composingUids.includes(s.data.uid)) {
 					composingUids.push(s.data.uid);
 				}
 			}
@@ -113,7 +113,7 @@ async function getUsersInTopic(socket, data, settings) {
 
 		settings.numUsers = Math.min(100, settings.numUsers || 10);
 
-		let userIds = uids.map(uid => parseInt(uid, 10));
+		let userIds = Object.keys(uids).map(uid => parseInt(uid, 10));
 
 		// bump composing users to the front of the queue
 		const intersection = userIds.filter(uid => composingUids.includes(uid));
@@ -124,7 +124,7 @@ async function getUsersInTopic(socket, data, settings) {
 			'uid', 'username', 'userslug', 'picture', 'status',
 		]);
 		userData = userData.filter(
-			u => u && parseInt(u.uid, 10) > 0 && u.status !== 'offline'
+			u => u && u.uid > 0 && u.status !== 'offline'
 		).slice(0, settings.numUsers);
 
 		userData.forEach(function (user) {

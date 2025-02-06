@@ -39,6 +39,7 @@ $(document).ready(function () {
 
 				var alreadyAddedUids = [];
 				var browsingUsersEl = $('[component="topic/browsing-users"]');
+				const labelEl = $('[component="topic/browsing-users-label"]');
 				// remove any users that are no longer in topic
 				browsingUsersEl.find('>[data-uid]').each(function () {
 					var uid = parseInt($(this).attr('data-uid'), 10);
@@ -51,6 +52,7 @@ $(document).ready(function () {
 
 				if (noChanges(currentUids, alreadyAddedUids)) {
 					showComposing(browsingUsersEl, data);
+					toggleLabel(labelEl, data);
 					startTimeout(currentUids);
 					return;
 				}
@@ -77,6 +79,7 @@ $(document).ready(function () {
 					});
 
 					showComposing(browsingUsersEl, data);
+					toggleLabel(labelEl, data);
 					startTimeout(currentUids);
 				});
 			});
@@ -99,6 +102,10 @@ $(document).ready(function () {
 			});
 			userEls.find('a').toggleClass('composing', !!user.composing);
 		});
+	}
+
+	function toggleLabel(labelEl, users) {
+		labelEl.toggleClass('hidden', !users.length);
 	}
 
 	function noChanges(currentUids, alreadyDisplayedUids) {

@@ -1,3 +1,4 @@
+<label component="topic/browsing-users-label" class="form-label text-muted text-sm hidden">Browsing Users</label>
 <div component="topic/browsing-users" class="d-flex gap-1">
 	{{{ each browsingUsers }}}
 	<div data-uid="{./uid}">

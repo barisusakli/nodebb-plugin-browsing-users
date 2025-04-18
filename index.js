@@ -89,7 +89,7 @@ function isUserInCache(browsingUsers, uid) {
 }
 
 async function getUsersInTopic(socket, data, settings) {
-	const uid = socket.uid;
+	const { uid } = socket;
 	const { tid, composing } = data;
 	const browsingUsers = cache.get('browsing:tid:' + tid) || [];
 	const composingUids = [];

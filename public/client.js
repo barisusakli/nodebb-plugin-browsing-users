@@ -1,7 +1,5 @@
 'use strict';
 
-/* globals $, window, document, app, ajaxify, socket */
-
 $(document).ready(function () {
 	const MAX_INTERVAL = 5000;
 	const MIN_INTERVAL = 2500;

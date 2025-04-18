@@ -8,6 +8,7 @@
     "url": "https://github.com/barisusakli/nodebb-plugin-browsing-users"
   },
   "scripts": {
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -22,9 +23,8 @@
     "lru-cache": "10.0.1"
   },
   "devDependencies": {
-    "eslint": "7.11.0",
-    "eslint-config-airbnb-base": "14.2.0",
-    "eslint-plugin-import": "2.22.1"
+    "eslint": "9.23.0",
+    "eslint-config-nodebb": "^1.0.7"
   },
   "nbbpm": {
     "compatibility": "^4.0.0"

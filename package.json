@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "eslint": "9.23.0",
-    "eslint-config-nodebb": "^1.0.7"
+    "eslint-config-nodebb": "^1.1.2"
   },
   "nbbpm": {
     "compatibility": "^4.0.0"

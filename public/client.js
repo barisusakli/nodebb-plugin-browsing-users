@@ -85,7 +85,10 @@ $(document).ready(function () {
 	}
 
 	function startTimeout(currentUids) {
-		interval = Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, Math.floor(currentUids.length / USERS_PER_INTERVAL_INCREASE) * INTERVAL_STEP));
+		interval = Math.min(
+			MAX_INTERVAL,
+			Math.max(MIN_INTERVAL, Math.floor(currentUids.length / USERS_PER_INTERVAL_INCREASE) * INTERVAL_STEP)
+		);
 		setTimeout(renderBrowsingUsers, interval);
 	}
 

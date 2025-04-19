@@ -1,7 +1,5 @@
 'use strict';
 
-/* globals $, define */
-
 define('admin/plugins/browsing-users', ['settings'], function (settings) {
 	const browsingUsers = {};
 

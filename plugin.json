@@ -14,5 +14,6 @@
 	},
 	"scss": [
 		"public/style.scss"
-	]
+	],
+	"languages": "languages"
 }

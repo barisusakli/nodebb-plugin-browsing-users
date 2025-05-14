@@ -15,5 +15,6 @@
 	"scss": [
 		"public/style.scss"
 	],
-	"languages": "languages"
+	"languages": "languages",
+	"defaultLang": "en_GB"
 }

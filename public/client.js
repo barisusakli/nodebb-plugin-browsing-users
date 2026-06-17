@@ -33,14 +33,14 @@ $(document).ready(function () {
 					return;
 				}
 				data = data.filter(u => !app.user.blocks.includes(u.uid));
-				var currentUids = data.map(u => parseInt(u.uid, 10));
+				const currentUids = data.map(u => parseInt(u.uid, 10));
 
-				var alreadyAddedUids = [];
-				var browsingUsersEl = $('[component="topic/browsing-users"]');
+				const alreadyAddedUids = [];
+				const browsingUsersEl = $('[component="topic/browsing-users"]');
 				const labelEl = $('[component="topic/browsing-users-label"]');
 				// remove any users that are no longer in topic
 				browsingUsersEl.find('>[data-uid]').each(function () {
-					var uid = parseInt($(this).attr('data-uid'), 10);
+					const uid = parseInt($(this).attr('data-uid'), 10);
 					if (!currentUids.includes(uid)) {
 						$(this).remove();
 					} else {
@@ -58,15 +58,15 @@ $(document).ready(function () {
 				app.parseAndTranslate('partials/topic/browsing-users', 'browsingUsers', {
 					browsingUsers: data,
 				}, function (html) {
-					var browsingUsersEl = $('[component="topic/browsing-users"]');
+					const browsingUsersEl = $('[component="topic/browsing-users"]');
 					if (!browsingUsersEl.length) {
 						return;
 					}
 
 					// add any new users
 					html.filter('[data-uid]').each(function () {
-						var $this = $(this);
-						var uid = parseInt($this.attr('data-uid'), 10);
+						const $this = $(this);
+						const uid = parseInt($this.attr('data-uid'), 10);
 						const existingEl = browsingUsersEl.find('>[data-uid=' + uid + ']');
 						if (
 							!alreadyAddedUids.includes(uid) &&
@@ -114,7 +114,7 @@ $(document).ready(function () {
 			return false;
 		}
 
-		for (var i = 0; i < currentUids.length; i++) {
+		for (let i = 0; i < currentUids.length; i++) {
 			if (currentUids[i] !== alreadyDisplayedUids[i]) {
 				return false;
 			}

@@ -1,21 +1,21 @@
 'use strict';
 
 const { LRUCache } = require('lru-cache');
-const winston = require.main.require('winston');
+const winston = nodebb.require('winston');
 
 const cache = new LRUCache({
 	max: 500,
 	ttl: 5000,
 });
 
-const groups = require.main.require('./src/groups');
-const meta = require.main.require('./src/meta');
-const user = require.main.require('./src/user');
-const privileges = require.main.require('./src/privileges');
-const socketPlugins = require.main.require('./src/socket.io/plugins');
-const routeHelpers = require.main.require('./src/routes/helpers');
-const socketIO = require.main.require('./src/socket.io');
-const widgets = require.main.require('./src/widgets');
+const groups = nodebb.require('./src/groups');
+const meta = nodebb.require('./src/meta');
+const user = nodebb.require('./src/user');
+const privileges = nodebb.require('./src/privileges');
+const socketPlugins = nodebb.require('./src/socket.io/plugins');
+const routeHelpers = nodebb.require('./src/routes/helpers');
+const socketIO = nodebb.require('./src/socket.io');
+const widgets = nodebb.require('./src/widgets');
 
 const plugin = module.exports;
 

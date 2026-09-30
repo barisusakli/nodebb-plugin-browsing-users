@@ -103,10 +103,13 @@ async function getUsersInTopic(socket, data, settings) {
 		const sockets = await socketIO.server.in(`topic_${tid}`).fetchSockets();
 		const uids = {};
 		for (const s of sockets) {
-			if (s.data.uid > 0) {
-				uids[s.data.uid] = 1;
-				if (s.data.composing && s.data.composing > Date.now() && !composingUids.includes(s.data.uid)) {
-					composingUids.push(s.data.uid);
+			// core stores socket.data.uid as a string since 4.14.0, but user.uid is a number,
+			// so composingUids.includes(user.uid) below never matched
+			const socketUid = parseInt(s.data.uid, 10);
+			if (socketUid > 0) {
+				uids[socketUid] = 1;
+				if (s.data.composing && s.data.composing > Date.now() && !composingUids.includes(socketUid)) {
+					composingUids.push(socketUid);
 				}
 			}
 		}
